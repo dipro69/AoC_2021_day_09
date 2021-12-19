@@ -12,17 +12,17 @@ const int LEN_LINE = 10; // constant for number of digits in an input line in fi
 const int NUM_EDGES = 4;
 const int NUM_CORNERS = 4;
 
-const int TOP_LEFT = 1;
-const int TOP_RIGHT = 1;
-const int BOTTOM_LEFT = 1;
-const int BOTTOM_RIGHT = 1;
+const int TOP_EDGE = 1;
+const int LEFT_EDGE = 2;
+const int RIGHT_EDGE = 4;
+const int BOTTOM_EDGE = 8;
 
 const int TOP_LEFT_CORNER = 1;
-const int TOP_RIGHT_CORNER = 1;
-const int BOTTOM_LEFT_CORNER = 1;
-const int BOTTOM_RIGHT_CORNER = 1;
+const int TOP_RIGHT_CORNER = 2;
+const int BOTTOM_LEFT_CORNER = 4;
+const int BOTTOM_RIGHT_CORNER = 8;
 
-const string INPUT_FILE = "heights_test.txt"; // filename with the input data
+const string INPUT_FILE = "Data/heights_test.txt"; // filename with the input data
 
 // this function opens a file and reads the lines into a string array
 int getInputData(string* input_data, string file_name)
@@ -55,44 +55,53 @@ int getInputData(string* input_data, string file_name)
 }
 
 // this function converts a string (length has to be 1) into an int digit
-int singleStrToInt(string s)
+int charToInt(char c)
 {
 	// input param: string s: the string that has 1 element to convert to an int
 
 	int output_int = 0;
 
-	// check if input has length 1
-	if (s.length() == 1)
+	switch (c)
 	{
 		// check which string is the input and return the int representation
-		if (s == "0")
-			output_int = 0;
-		else if (s == "1")
-			output_int = 1;
-		else if (s == "2")
-			output_int = 2;
-		else if (s == "3")
-			output_int = 3;
-		else if (s == "4")
-			output_int = 4;
-		else if (s == "5")
-			output_int = 5;
-		else if (s == "6")
-			output_int = 6;
-		else if (s == "7")
-			output_int = 7;
-		else if (s == "8")
-			output_int = 8;
-		else if (s == "9")
-			output_int = 9;
-	}
-	else
-	{
+	case('0'):
+		output_int = 0;
+		break;
+	case('1'):
+		output_int = 1;
+		break;
+	case('2'):
+		output_int = 2;
+		break;
+	case('3'):
+		output_int = 3;
+		break;
+	case('4'):
+		output_int = 4;
+		break;
+	case('5'):
+		output_int = 5;
+		break;
+	case('6'):
+		output_int = 6;
+		break;
+	case('7'):
+		output_int = 7;
+		break;
+	case('8'):
+		output_int = 8;
+		break;
+	case('9'):
+		output_int = 9;
+		break;
+
+	default:
 		bool bool_talktalk = true; // if true than we are debugging
 		if (bool_talktalk)
 		{
-			cout << "Warning: input string doesn't have required length 1!";
+			cout << "Warning: input char is not an integer!";
 		}
+		break;
 	}
 
 	return output_int;
@@ -102,21 +111,20 @@ int singleStrToInt(string s)
 int decodeStr(string s, int** pArray, int row)
 {
 	// input param: string s: this is the string to convert to an integer array
-	// input param: int int_array[][LEN_LINES]: this array receives the integer values from the string (by reference)
+	// input param: int** pArray: this array receives the integer values from the string (by reference)
 	// input param: int row: this is the row index in the integer array
 
-	string sub_string = ""; // this variable will receive the substring
 	int int_from_str = 0; // this variable  contains the int that is decoded from the substring
-
+	char* charr_arr; //pointer to a char array
+	charr_arr = &s[0]; // store the adress of string s
+	
 	// how many elements in this string?
 	int string_length = s.length();
 	// loop through all the elements in the string
 	for (int i = 0; i < string_length; i++)
 	{
-		// get the element via substring routine
-		sub_string = s.substr(i, 1);
-		// decode the int value in teh substring
-		int_from_str = singleStrToInt(sub_string);
+		// decode the int value in the substring
+		int_from_str = charToInt(*(charr_arr + i));
 		// store the int value in the integer array in the proper row
 		*(*(pArray + row) + i) = int_from_str;
 	}
@@ -134,54 +142,47 @@ int getEdgeInfo(int edge_info_array[], int row, int col)
 	// everywhere else in the array, 4 adjacent values to consider
 
 	// reset edge_info_array
-	edge_info_array[0] = 0; // TOP_LEFT
-	edge_info_array[1] = 0; // TOP_RIGHT
-	edge_info_array[2] = 0; // BOTTOM_LEFT
-	edge_info_array[3] = 0; // BOTTOM_RIGHT
-	edge_info_array[4] = 0; // TOP_LEFT_CORNER
-	edge_info_array[5] = 0; // TOP_RIGHT_CORNER
-	edge_info_array[6] = 0; // BOTTOM_LEFT_CORNER
-	edge_info_array[7] = 0; // BOTTOM_RIGHT_CORNER
-
+	edge_info_array[0] = 0; // no edges yet
+	edge_info_array[1] = 0; // no corners yet
+	
 	// get edge info
 	if (row == 0) // at top
 	{
-		edge_info_array[0] = TOP_LEFT;
-		edge_info_array[1] = TOP_RIGHT;
-
+		edge_info_array[0] = TOP_EDGE; // 1
+		
 		if (col == 0) // at left
 		{
-			edge_info_array[4] = TOP_LEFT_CORNER;
+			edge_info_array[0] = TOP_EDGE + LEFT_EDGE; // 3
+			edge_info_array[1] = TOP_LEFT_CORNER; // 1
 		}
 		else if (col == LEN_LINE - 1) // at right
 		{
-			edge_info_array[5] = TOP_RIGHT_CORNER;
+			edge_info_array[0] = TOP_EDGE + RIGHT_EDGE; // 5
+			edge_info_array[1] = TOP_RIGHT_CORNER; // 2
 		}
 	}
 	else if (row == NUM_LINES - 1) // at bottom
 	{
-		edge_info_array[2] = BOTTOM_LEFT;
-		edge_info_array[3] = BOTTOM_RIGHT;
-
+		edge_info_array[0] = BOTTOM_EDGE; // 8
+		
 		if (col == 0) // at left
 		{
-			edge_info_array[6] = BOTTOM_LEFT_CORNER;
+			edge_info_array[0] = BOTTOM_EDGE + LEFT_EDGE; // 10
+			edge_info_array[1] = BOTTOM_LEFT_CORNER; // 4
 		}
 		else if (col == LEN_LINE - 1) // at right
 		{
-			edge_info_array[7] = BOTTOM_RIGHT_CORNER;
+			edge_info_array[0] = BOTTOM_EDGE + RIGHT_EDGE; // 12
+			edge_info_array[1] = BOTTOM_RIGHT_CORNER; // 8
 		}
 	}
-
-	if (col == 0) // at left
+	else if (col == 0) // at left
 	{
-		edge_info_array[0] = TOP_LEFT;
-		edge_info_array[2] = BOTTOM_LEFT;
+		edge_info_array[0] = LEFT_EDGE; // 2
 	}
 	else if (col == LEN_LINE - 1) // at right
 	{
-		edge_info_array[1] = TOP_RIGHT;
-		edge_info_array[3] = BOTTOM_RIGHT;
+		edge_info_array[0] = RIGHT_EDGE; // 4
 	}
 
 	return 0;
@@ -207,53 +208,52 @@ int calcLowPoint(int** pArray, int edge_info_array[], int row, int col)
 	int output_result = -1;
 	int check_value = *(*(pArray + row) + col);
 
-	int edge_check = edge_info_array[0] + edge_info_array[1] + edge_info_array[2] + edge_info_array[3];
-	int corner_check = edge_info_array[4] + edge_info_array[5] + edge_info_array[6] + edge_info_array[7];
+	int edge_check = edge_info_array[0];
+	int corner_check = edge_info_array[1];
 
-	if (edge_check > 0)
-	{
-		if (corner_check == 0)
-		{
-			if (edge_info_array[0] == TOP_LEFT && edge_info_array[1] == TOP_RIGHT) // top edge
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), 999);
-			}
-			else if (edge_info_array[2] == BOTTOM_LEFT && edge_info_array[3] == BOTTOM_RIGHT) // bottom edge
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), 999);
-			}
-			else if (edge_info_array[0] == TOP_LEFT && edge_info_array[2] == BOTTOM_LEFT) // left edge
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col + 1), 999);
-			}
-			else if (edge_info_array[1] == TOP_RIGHT && edge_info_array[3] == BOTTOM_RIGHT) // right edge
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col - 1), 999);
-			}
-		}
-		else if (corner_check == 1)
-		{
-			if (edge_info_array[4] == TOP_LEFT_CORNER)
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), 999, 999);
-			}
-			else if (edge_info_array[5] == TOP_RIGHT_CORNER)
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row + 1) + col), 999, 999);
-			}
-			else if (edge_info_array[6] == BOTTOM_LEFT_CORNER)
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), 999, 999);
-			}
-			else if (edge_info_array[7] == BOTTOM_RIGHT_CORNER)
-			{
-				output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row - 1) + col), 999, 999);
-			}
-		}
-	}
-	else
+	if (edge_check == 0 && corner_check == 0)
 	{
 		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col));
+	}
+	else if (edge_check > 0 && corner_check == 0)
+	{
+		switch (edge_check)
+		{
+		case(TOP_EDGE): // top edge
+			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), 999);
+			break;
+		case(BOTTOM_EDGE): // bottom edge
+			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), 999);
+			break;
+		case(LEFT_EDGE): // left edge
+			output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col + 1), 999);
+			break;
+		case(RIGHT_EDGE): // right edge
+			output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col - 1), 999);
+			break;
+		default:
+			break;
+		}
+	}
+	else if (corner_check > 0)
+	{
+		switch (corner_check)
+		{
+		case(TOP_LEFT_CORNER):
+			output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), 999, 999);
+			break;
+		case(TOP_RIGHT_CORNER):
+			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row + 1) + col), 999, 999);
+			break;
+		case(BOTTOM_LEFT_CORNER):
+			output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), 999, 999);
+			break;
+		case(BOTTOM_RIGHT_CORNER):
+			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row - 1) + col), 999, 999);
+			break;
+		default:
+			break;
+		}
 	}
 
 	return output_result; // if -1 than no low point else return low point value
@@ -279,9 +279,6 @@ int puzzleDay9Part1(int** pArray)
 			// everywhere else in the array, 4 adjacent values to consider
 
 			getEdgeInfo(edge_info_array, i, j);
-			// cout << "edge_info_array   " << i << " " << j << " ";
-			// cout << edge_info_array[0] << edge_info_array[1] << edge_info_array[2] << edge_info_array[3];
-			// cout << edge_info_array[4] << edge_info_array[5] << edge_info_array[6] << edge_info_array[7] << "\n";
 			height = calcLowPoint(pArray, edge_info_array, i, j);
 			if (height != -1)
 			{
