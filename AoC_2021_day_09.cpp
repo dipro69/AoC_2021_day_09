@@ -6,28 +6,17 @@
 #include <fstream>
 using namespace std;
 
-const int NUM_LINES = 5; // constant for number of lines in file to read
-const int LEN_LINE = 10; // constant for number of digits in an input line in file to read
+enum class Edges{NO_EDGE_OR_CORNER, TOP_LEFT_CORNER, TOP_EDGE, TOP_RIGHT_CORNER, RIGHT_EDGE, BOTTOM_RIGHT_CORNER, BOTTOM_EDGE, BOTTOM_LEFT_CORNER, LEFT_EDGE};
 
-const int NUM_EDGES = 4;
-const int NUM_CORNERS = 4;
-
-const int TOP_EDGE = 1;
-const int LEFT_EDGE = 2;
-const int RIGHT_EDGE = 4;
-const int BOTTOM_EDGE = 8;
-
-const int TOP_LEFT_CORNER = 1;
-const int TOP_RIGHT_CORNER = 2;
-const int BOTTOM_LEFT_CORNER = 4;
-const int BOTTOM_RIGHT_CORNER = 8;
-
-const string INPUT_FILE = "Data/heights_test.txt"; // filename with the input data
+const int NUM_LINES = 100; // constant for number of lines in file to read
+const int LEN_LINE = 100; // constant for number of digits in an input line in file to read
+const string INPUT_FILE = "Data/heights.txt"; // filename with the input data
+const int LARGE_DUMMY_VALUE = 999;
 
 // this function opens a file and reads the lines into a string array
 int getInputData(string* input_data, string file_name)
 {
-	// input param: string input_data[]: array that receives the input strings from file (by reference)
+	// input param: string* input_data: pointer to array that receives the input strings from file
 	// input param: string file_name: the file to read from
 
 	string line; // here we store a line of input data
@@ -54,16 +43,16 @@ int getInputData(string* input_data, string file_name)
 	return 0;
 }
 
-// this function converts a string (length has to be 1) into an int digit
+// this function is a util function that converts a char into an int digit
 int charToInt(char c)
 {
-	// input param: string s: the string that has 1 element to convert to an int
+	// input param: char c: the char to convert to an int
 
 	int output_int = 0;
 
+	// check which char is the input and return the int representation
 	switch (c)
 	{
-		// check which string is the input and return the int representation
 	case('0'):
 		output_int = 0;
 		break;
@@ -111,7 +100,7 @@ int charToInt(char c)
 int decodeStr(string s, int** pArray, int row)
 {
 	// input param: string s: this is the string to convert to an integer array
-	// input param: int** pArray: this array receives the integer values from the string (by reference)
+	// input param: int** pArray: this pointer to an int array receives the integer values from the string
 	// input param: int row: this is the row index in the integer array
 
 	int int_from_str = 0; // this variable  contains the int that is decoded from the substring
@@ -132,64 +121,64 @@ int decodeStr(string s, int** pArray, int row)
 	return 0;
 }
 
-int getEdgeInfo(int edge_info_array[], int row, int col)
+// this function delivers the edge info according to our position in the multidimensional integer array
+Edges getEdgeInfo(int row, int col)
 {
-	// input param: int edge_info_array[]: contains information about the array edges so we can check where we are in the array
+	// input param: int row, col: the position in the input data array
 
 	// if row = 0 or row = NUM_LINES-1 we are at a row_edge (top, bottom), 3 adjacent values to consider
 	// if col = 0 or col = LEN_LINE-1 we are at a col_edge (left, right), 3 adjacent values to consider
 	// if we are at a row_edge and a col_edge we are at a corner (top_left, top_right, bottom_left, bottom_right), 2 adjacent values to consider
 	// everywhere else in the array, 4 adjacent values to consider
 
-	// reset edge_info_array
-	edge_info_array[0] = 0; // no edges yet
-	edge_info_array[1] = 0; // no corners yet
-	
+	// reset edge info
+	Edges output_result = Edges::NO_EDGE_OR_CORNER;
+		
 	// get edge info
 	if (row == 0) // at top
 	{
-		edge_info_array[0] = TOP_EDGE; // 1
+		output_result = Edges::TOP_EDGE;
 		
 		if (col == 0) // at left
 		{
-			edge_info_array[0] = TOP_EDGE + LEFT_EDGE; // 3
-			edge_info_array[1] = TOP_LEFT_CORNER; // 1
+			output_result = Edges::TOP_LEFT_CORNER;
 		}
 		else if (col == LEN_LINE - 1) // at right
 		{
-			edge_info_array[0] = TOP_EDGE + RIGHT_EDGE; // 5
-			edge_info_array[1] = TOP_RIGHT_CORNER; // 2
+			output_result = Edges::TOP_RIGHT_CORNER;
 		}
 	}
 	else if (row == NUM_LINES - 1) // at bottom
 	{
-		edge_info_array[0] = BOTTOM_EDGE; // 8
+		output_result = Edges::BOTTOM_EDGE;
 		
 		if (col == 0) // at left
 		{
-			edge_info_array[0] = BOTTOM_EDGE + LEFT_EDGE; // 10
-			edge_info_array[1] = BOTTOM_LEFT_CORNER; // 4
+			output_result = Edges::BOTTOM_LEFT_CORNER;
 		}
 		else if (col == LEN_LINE - 1) // at right
 		{
-			edge_info_array[0] = BOTTOM_EDGE + RIGHT_EDGE; // 12
-			edge_info_array[1] = BOTTOM_RIGHT_CORNER; // 8
+			output_result = Edges::BOTTOM_RIGHT_CORNER;
 		}
 	}
 	else if (col == 0) // at left
 	{
-		edge_info_array[0] = LEFT_EDGE; // 2
+		output_result = Edges::LEFT_EDGE;
 	}
 	else if (col == LEN_LINE - 1) // at right
 	{
-		edge_info_array[0] = RIGHT_EDGE; // 4
+		output_result = Edges::RIGHT_EDGE;
 	}
 
-	return 0;
+	return output_result;
 }
 
+// this function checks if the value in the current position is the lowest value compared to it's neighbours (adjacent values)
 int checkMinValue(int v, int first, int second, int third, int fourth)
 {
+	// input param: int v: the value that is checked
+	// input param: int first to fourth: the neighbourvalues to check
+
 	int output_result = -1;
 
 	if (v < first && v < second && v < third && v < fourth)
@@ -202,68 +191,65 @@ int checkMinValue(int v, int first, int second, int third, int fourth)
 }
 
 // this functions checks if current value is a low point
-int calcLowPoint(int** pArray, int edge_info_array[], int row, int col)
+int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col)
 {
+	// input param: int** pArray: pointer to the multidimensional int array
+	// input param: Edges input_edge_info: the edge info to check for each position
+	// input param: int row, col: coordinates for our current position
+
+	// if row = 0 or row = NUM_LINES-1 we are at a row_edge (top, bottom), 3 adjacent values to consider
+	// if col = 0 or col = LEN_LINE-1 we are at a col_edge (left, right), 3 adjacent values to consider
+	// if we are at a row_edge and a col_edge we are at a corner (top_left, top_right, bottom_left, bottom_right), 2 adjacent values to consider
+	// everywhere else in the array, 4 adjacent values to consider
+
 	// calculate if current array value is the minimum value compared to adjacent values, if true then it is a low_point
 	int output_result = -1;
 	int check_value = *(*(pArray + row) + col);
 
-	int edge_check = edge_info_array[0];
-	int corner_check = edge_info_array[1];
-
-	if (edge_check == 0 && corner_check == 0)
+	switch(input_edge_info)
 	{
+	case(Edges::NO_EDGE_OR_CORNER):
 		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col));
-	}
-	else if (edge_check > 0 && corner_check == 0)
-	{
-		switch (edge_check)
-		{
-		case(TOP_EDGE): // top edge
-			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), 999);
-			break;
-		case(BOTTOM_EDGE): // bottom edge
-			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), 999);
-			break;
-		case(LEFT_EDGE): // left edge
-			output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col + 1), 999);
-			break;
-		case(RIGHT_EDGE): // right edge
-			output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col - 1), 999);
-			break;
-		default:
-			break;
-		}
-	}
-	else if (corner_check > 0)
-	{
-		switch (corner_check)
-		{
-		case(TOP_LEFT_CORNER):
-			output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), 999, 999);
-			break;
-		case(TOP_RIGHT_CORNER):
-			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row + 1) + col), 999, 999);
-			break;
-		case(BOTTOM_LEFT_CORNER):
-			output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), 999, 999);
-			break;
-		case(BOTTOM_RIGHT_CORNER):
-			output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row - 1) + col), 999, 999);
-			break;
-		default:
-			break;
-		}
+		break;
+	case(Edges::TOP_EDGE): // top edge
+		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::BOTTOM_EDGE): // bottom edge
+		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::LEFT_EDGE): // left edge
+		output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col + 1), LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::RIGHT_EDGE): // right edge
+		output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col - 1), LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::TOP_LEFT_CORNER):
+		output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::TOP_RIGHT_CORNER):
+		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row + 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::BOTTOM_LEFT_CORNER):
+		output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		break;
+	case(Edges::BOTTOM_RIGHT_CORNER):
+		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row - 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		break;
+	default:
+		break;
 	}
 
 	return output_result; // if -1 than no low point else return low point value
 }
 
+// this function runs the puzzle algorithm for AoC day9 part 1
 int puzzleDay9Part1(int** pArray)
 {
+	// input param: int** pArray: pointer to the multidimensional int array
+
 	// puzzle day 9: part 1
 
-	int edge_info_array[NUM_EDGES + NUM_CORNERS] = { 0,0,0,0,0,0,0,0 };
+	Edges edge_info = Edges::NO_EDGE_OR_CORNER;
 	int sum_risk_level = 0;
 	int height = 0;
 	int risk_level = -1;
@@ -278,8 +264,11 @@ int puzzleDay9Part1(int** pArray)
 			// if we are at a row_edge and a col_edge we are at a corner (top_left, top_right, bottom_left, bottom_right), 2 adjacent values to consider
 			// everywhere else in the array, 4 adjacent values to consider
 
-			getEdgeInfo(edge_info_array, i, j);
-			height = calcLowPoint(pArray, edge_info_array, i, j);
+			// first get edge info for current position in the array
+			edge_info = getEdgeInfo(i, j);
+			// calculate if lowest point and if so get height, if not receive -1
+			height = calcLowPoint(pArray, edge_info, i, j);
+			// if indeed a lowest point then get risk level and total with output result in sum
 			if (height != -1)
 			{
 				// calculate risk level
@@ -293,10 +282,10 @@ int puzzleDay9Part1(int** pArray)
 	}
 
 	// calculate sum of all found risk levels
-
 	return sum_risk_level;
 }
 
+// this function retrieves the data and runs the central algorithm
 int runDay9Part1()
 {
 	string* input_data = new string[NUM_LINES]; // string array for retrieving input data
@@ -309,15 +298,15 @@ int runDay9Part1()
 		*(pArray + i) = new int[LEN_LINE];
 	}
 
-	string file_name = INPUT_FILE; // define our input file
+	getInputData(input_data, INPUT_FILE); // read the data from file
 
-	getInputData(input_data, file_name); // read the data from file
-
+	// convert input data strings to integers
 	for (int i = 0; i < NUM_LINES; i++)
 	{
 		decodeStr(input_data[i], pArray, i);
 	}
 
+	// perform the central algorithm to get puzzle answer
 	int sum = puzzleDay9Part1(pArray);
 	cout << "Sum of puzzle day 9 part 1 = " << sum;
 
