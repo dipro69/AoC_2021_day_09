@@ -4,13 +4,19 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "CBasin.h"
+
 using namespace std;
 
 enum class Edges{NO_EDGE_OR_CORNER, TOP_LEFT_CORNER, TOP_EDGE, TOP_RIGHT_CORNER, RIGHT_EDGE, BOTTOM_RIGHT_CORNER, BOTTOM_EDGE, BOTTOM_LEFT_CORNER, LEFT_EDGE};
 
-const int NUM_LINES = 100; // constant for number of lines in file to read
-const int LEN_LINE = 100; // constant for number of digits in an input line in file to read
-const string INPUT_FILE = "Data/heights.txt"; // filename with the input data
+const int NUM_LINES = 5; // constant for number of lines in file to read
+const int LEN_LINE = 10; // constant for number of digits in an input line in file to read
+
+// const int LOW_POINT_COUNT = 237; // constant for number of low points in the data
+const int LOW_POINT_COUNT = 4; // constant for number of low points in the data
+
+const string INPUT_FILE = "Data/heights_test.txt"; // filename with the input data
 const int LARGE_DUMMY_VALUE = 999;
 
 // this function opens a file and reads the lines into a string array
@@ -242,8 +248,60 @@ int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col)
 	return output_result; // if -1 than no low point else return low point value
 }
 
+int printBasinData(CBasin* pBasin)
+{
+	// temporary variables to store the data that we will show in cout
+	int	ti = pBasin->getIndex();
+	int	tr = pBasin->getRow();
+	int	tc = pBasin->getCol();
+	int	trl = pBasin->getRiskLevel();
+
+	cout << "Low point info " << ti << " " << " " << tr << " " << tc << " " << trl << "\n";
+	
+	return 0;
+}
+
+int calculateBasinSize(CBasin* pBasin, int** pArray)
+{
+	// reset the integer array with input data, set all non 9 values to -1
+	// we are going to fill each basin with the index integer from it's origin low point (stored in CBasin object)
+	// 
+	// start at row, col from low point stored in pBasin and put in on the investigation stack as starting point
+	// start while (stack size not 0) do 
+	//	   investigate the top, bottom, left and right neighbours from current point on the stack
+	//	   if neighbour = 9, don't sample that point further
+	//     if neighbour another integer value, don't sample that point further
+	//     if neighbour is an edge point, don't sample that point further
+	//	   if neighbour = -1, store it as a point on the stack for further investigation
+	//     when all 4 neigbours are investigated, store the index value in the central point,
+	//     increment the number of sampled points, this is the size of the basin
+	//	   load next stack item for investigation
+
+	// reset the integer array with input data, set all non 9 values to -1
+	// loop through all the int values
+	int int_empty = -1;
+	int int_print = 0;
+	for (int i = 0; i < NUM_LINES; i++)
+	{
+		for (int j = 0; j < LEN_LINE; j++)
+		{
+			if ( *(*(pArray + i) + j) != 9 )
+			{
+				*(*(pArray + i) + j) = int_empty;
+			}
+			// check this
+			int_print = *(*(pArray + i) + j);
+			cout << int_print;
+		}
+		// check this
+		cout << "\n";
+	}
+
+	return 0;
+}
+
 // this function runs the puzzle algorithm for AoC day9 part 1
-int puzzleDay9Part1(int** pArray)
+int algorithmDay9(int** pArray, CBasin* pArray_low_points)
 {
 	// input param: int** pArray: pointer to the multidimensional int array
 
@@ -253,6 +311,7 @@ int puzzleDay9Part1(int** pArray)
 	int sum_risk_level = 0;
 	int height = 0;
 	int risk_level = -1;
+	int low_point_counter = 0;
 
 	// loop through all the int values
 	for (int i = 0; i < NUM_LINES; i++)
@@ -276,22 +335,45 @@ int puzzleDay9Part1(int** pArray)
 				risk_level = 1 + height;
 				sum_risk_level = sum_risk_level + risk_level;
 				cout << "risk_level: " << risk_level << "\n";
+
+				// here starts day 9 part 2
+				// store the low point coordinates in a list
+				// we need this list to identify basins
+				// and calculate the size of the basins
+				// final step is to calculate the addition of all the sizes
+				CBasin basin;
+				basin.setCoordinates(i, j);
+				basin.setIndex(low_point_counter);
+				basin.setRiskLevel(risk_level);
+				basin.setNumElements(0);
+				*(pArray_low_points + low_point_counter) = basin;
+				low_point_counter++;
 			}
 
 		}
 	}
+
+	for (int i = 0; i < LOW_POINT_COUNT; i++)
+	{
+		printBasinData((pArray_low_points + i));
+	}
+
+	calculateBasinSize(pArray_low_points, pArray);
 
 	// calculate sum of all found risk levels
 	return sum_risk_level;
 }
 
 // this function retrieves the data and runs the central algorithm
-int runDay9Part1()
+int runDay9()
 {
 	string* input_data = new string[NUM_LINES]; // string array for retrieving input data
 
 	// memory allocated for elements of rows
 	int** pArray = new int* [NUM_LINES];
+	// memory allocated for array with all the low points in the data
+	CBasin* pArray_low_points = new CBasin[LOW_POINT_COUNT];
+
 	// memory allocated for  elements of each column.  
 	for (int i = 0; i < NUM_LINES; i++)
 	{
@@ -307,14 +389,17 @@ int runDay9Part1()
 	}
 
 	// perform the central algorithm to get puzzle answer
-	int sum = puzzleDay9Part1(pArray);
+	int sum = algorithmDay9(pArray, pArray_low_points);
 	cout << "Sum of puzzle day 9 part 1 = " << sum;
 
 	// free the allocated memory 
+	delete[] pArray_low_points;
+
 	for (int i = 0; i < NUM_LINES; i++)
 	{
 		delete[] pArray[i];
 	}
+
 	delete[] pArray;
 	delete[] input_data;
 
@@ -324,7 +409,7 @@ int runDay9Part1()
 
 int main()
 {
-	runDay9Part1();
+	runDay9();
 	cout << "\n";
 	system("pause");
 	return 0;
