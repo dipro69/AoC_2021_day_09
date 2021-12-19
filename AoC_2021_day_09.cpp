@@ -336,17 +336,9 @@ int runDay9Part1()
 int main()
 {
 	runDay9Part1();
-
-	int stop_val;
-	for (;;)
-	{
-		cout << "\nPress 0 to stop\n";
-		cin >> stop_val;
-		if (!stop_val)
-		{
-			break;
-		}
-	}
+	cout << "\n";
+	system("pause");
+	return 0;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
