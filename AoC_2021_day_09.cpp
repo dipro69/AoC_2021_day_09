@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include "CBasin.h"
+#include "StackNode.cpp"
 
 using namespace std;
 
@@ -18,6 +19,29 @@ const int LOW_POINT_COUNT = 4; // constant for number of low points in the data
 
 const string INPUT_FILE = "Data/heights_test.txt"; // filename with the input data
 const int LARGE_DUMMY_VALUE = 999;
+
+int getInputData(string* input_data, string file_name);
+int charToInt(char c);
+int decodeStr(string s, int** pArray, int row);
+Edges getEdgeInfo(int row, int col);
+int checkMinValue(int v, int first, int second, int third, int fourth);
+int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col);
+int printBasinData(CBasin* pBasin);
+int calculateBasinSize(CBasin* pBasin, int** pArray);
+int algorithmDay9(int** pArray, CBasin* pArray_low_points);
+int runDay9();
+int testStackNode();
+
+int main()
+{
+	// runDay9();
+
+	testStackNode();
+
+	cout << "\n";
+	system("pause");
+	return 0;
+}
 
 // this function opens a file and reads the lines into a string array
 int getInputData(string* input_data, string file_name)
@@ -407,11 +431,35 @@ int runDay9()
 	return 0;
 }
 
-int main()
+// Driver code
+int testStackNode()
 {
-	runDay9();
-	cout << "\n";
-	system("pause");
+	// create a new StackNode pointer
+	StackNode* ptr_root = NULL;
+
+	// push integers on the stack
+	// we pass the push function a reference to the root pointer so we can change it
+	push(&ptr_root, 10);
+	push(&ptr_root, 20);
+	push(&ptr_root, 30);
+
+	// now we pop an element from the stack
+	cout << pop(&ptr_root) << " popped from stack\n";
+	// we investigate the current top element
+	cout << "Top element is " << peek(ptr_root) << endl;
+
+	cout << "Elements present in stack : ";
+	//print all elements in stack :
+	while (!isEmpty(ptr_root))
+	{
+		// print top element in stack
+		cout << peek(ptr_root) << " ";
+		// remove top element in stack
+		pop(&ptr_root);
+	}
+
+	printINT_MIN();
+
 	return 0;
 }
 
