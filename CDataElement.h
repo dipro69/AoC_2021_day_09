@@ -1,5 +1,5 @@
 #pragma once
-class CBasin
+class CDataElement
 {
 public:
 	int setCoordinates(int in_row, int in_col);

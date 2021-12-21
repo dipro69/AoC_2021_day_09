@@ -1,11 +1,11 @@
 // AoC_2021_day_09.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-#include <string>
+#include "CStack.h"
+#include "CDataElement.h"
 #include <fstream>
-#include "CBasin.h"
-#include "StackNode.cpp"
+#include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -26,17 +26,15 @@ int decodeStr(string s, int** pArray, int row);
 Edges getEdgeInfo(int row, int col);
 int checkMinValue(int v, int first, int second, int third, int fourth);
 int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col);
-int printBasinData(CBasin* pBasin);
-int calculateBasinSize(CBasin* pBasin, int** pArray);
-int algorithmDay9(int** pArray, CBasin* pArray_low_points);
+int printDataElement(CDataElement* pDataElement);
+int calculateBasinSize(CDataElement* pDataElement, int** pArray);
+int algorithmDay9(int** pArray, CDataElement* pArray_low_points);
 int runDay9();
-int testStackNode();
+int testStackNode(CDataElement* pArray_low_points);
 
 int main()
 {
-	// runDay9();
-
-	testStackNode();
+	runDay9();
 
 	cout << "\n";
 	system("pause");
@@ -272,25 +270,25 @@ int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col)
 	return output_result; // if -1 than no low point else return low point value
 }
 
-int printBasinData(CBasin* pBasin)
+int printDataElement(CDataElement* pDataElement)
 {
 	// temporary variables to store the data that we will show in cout
-	int	ti = pBasin->getIndex();
-	int	tr = pBasin->getRow();
-	int	tc = pBasin->getCol();
-	int	trl = pBasin->getRiskLevel();
+	int	ti = pDataElement->getIndex();
+	int	tr = pDataElement->getRow();
+	int	tc = pDataElement->getCol();
+	int	trl = pDataElement->getRiskLevel();
 
 	cout << "Low point info " << ti << " " << " " << tr << " " << tc << " " << trl << "\n";
 	
 	return 0;
 }
 
-int calculateBasinSize(CBasin* pBasin, int** pArray)
+int calculateBasinSize(CDataElement* pDataElement, int** pArray)
 {
 	// reset the integer array with input data, set all non 9 values to -1
-	// we are going to fill each basin with the index integer from it's origin low point (stored in CBasin object)
+	// we are going to fill each basin with the index integer from it's origin low point (stored in CDataElement object)
 	// 
-	// start at row, col from low point stored in pBasin and put in on the investigation stack as starting point
+	// start at row, col from low point stored in pDataElement and put in on the investigation stack as starting point
 	// start while (stack size not 0) do 
 	//	   investigate the top, bottom, left and right neighbours from current point on the stack
 	//	   if neighbour = 9, don't sample that point further
@@ -325,7 +323,7 @@ int calculateBasinSize(CBasin* pBasin, int** pArray)
 }
 
 // this function runs the puzzle algorithm for AoC day9 part 1
-int algorithmDay9(int** pArray, CBasin* pArray_low_points)
+int algorithmDay9(int** pArray, CDataElement* pArray_low_points)
 {
 	// input param: int** pArray: pointer to the multidimensional int array
 
@@ -365,12 +363,12 @@ int algorithmDay9(int** pArray, CBasin* pArray_low_points)
 				// we need this list to identify basins
 				// and calculate the size of the basins
 				// final step is to calculate the addition of all the sizes
-				CBasin basin;
-				basin.setCoordinates(i, j);
-				basin.setIndex(low_point_counter);
-				basin.setRiskLevel(risk_level);
-				basin.setNumElements(0);
-				*(pArray_low_points + low_point_counter) = basin;
+				CDataElement data_element;
+				data_element.setCoordinates(i, j);
+				data_element.setIndex(low_point_counter);
+				data_element.setRiskLevel(risk_level);
+				data_element.setNumElements(0);
+				*(pArray_low_points + low_point_counter) = data_element;
 				low_point_counter++;
 			}
 
@@ -379,10 +377,12 @@ int algorithmDay9(int** pArray, CBasin* pArray_low_points)
 
 	for (int i = 0; i < LOW_POINT_COUNT; i++)
 	{
-		printBasinData((pArray_low_points + i));
+		printDataElement((pArray_low_points + i));
 	}
 
 	calculateBasinSize(pArray_low_points, pArray);
+
+	testStackNode(pArray_low_points);
 
 	// calculate sum of all found risk levels
 	return sum_risk_level;
@@ -396,7 +396,7 @@ int runDay9()
 	// memory allocated for elements of rows
 	int** pArray = new int* [NUM_LINES];
 	// memory allocated for array with all the low points in the data
-	CBasin* pArray_low_points = new CBasin[LOW_POINT_COUNT];
+	CDataElement* pArray_low_points = new CDataElement[LOW_POINT_COUNT];
 
 	// memory allocated for  elements of each column.  
 	for (int i = 0; i < NUM_LINES; i++)
@@ -414,7 +414,7 @@ int runDay9()
 
 	// perform the central algorithm to get puzzle answer
 	int sum = algorithmDay9(pArray, pArray_low_points);
-	cout << "Sum of puzzle day 9 part 1 = " << sum;
+	cout << "Sum of puzzle day 9 part 1 = " << sum << "\n";
 
 	// free the allocated memory 
 	delete[] pArray_low_points;
@@ -432,33 +432,20 @@ int runDay9()
 }
 
 // Driver code
-int testStackNode()
+int testStackNode(CDataElement* pArray_low_points)
 {
 	// create a new StackNode pointer
-	StackNode* ptr_root = NULL;
+	CStack stack;
 
-	// push integers on the stack
-	// we pass the push function a reference to the root pointer so we can change it
-	push(&ptr_root, 10);
-	push(&ptr_root, 20);
-	push(&ptr_root, 30);
-
-	// now we pop an element from the stack
-	cout << pop(&ptr_root) << " popped from stack\n";
-	// we investigate the current top element
-	cout << "Top element is " << peek(ptr_root) << endl;
-
-	cout << "Elements present in stack : ";
-	//print all elements in stack :
-	while (!isEmpty(ptr_root))
+	for (int i = 0; i < LOW_POINT_COUNT; i++)
 	{
-		// print top element in stack
-		cout << peek(ptr_root) << " ";
-		// remove top element in stack
-		pop(&ptr_root);
+		stack.pushItem((pArray_low_points + i)->getIndex());
 	}
-
-	printINT_MIN();
+	
+	// now we pop an element from the stack
+	stack.popItem();
+	// we investigate the current top element
+	stack.peekItem();
 
 	return 0;
 }
