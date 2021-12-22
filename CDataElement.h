@@ -10,7 +10,7 @@ public:
 	int setRiskLevel(int in_risk_level);
 	int getRiskLevel();
 	int setNumElements(int in_num_elements);
-private:
+protected:
 	int row;
 	int col;
 	int index;

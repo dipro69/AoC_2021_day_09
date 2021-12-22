@@ -439,13 +439,16 @@ int testStackNode(CDataElement* pArray_low_points)
 
 	for (int i = 0; i < LOW_POINT_COUNT; i++)
 	{
-		stack.pushItem((pArray_low_points + i)->getIndex());
+		// push information from data element to stack node
+		stack.pushItem((pArray_low_points + i));
 	}
 	
 	// now we pop an element from the stack
 	stack.popItem();
 	// we investigate the current top element
 	stack.peekItem();
+	// print alle the items
+	stack.printItems();
 
 	return 0;
 }
