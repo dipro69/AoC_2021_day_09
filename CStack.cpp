@@ -17,7 +17,6 @@ CStack::~CStack()
 
 void CStack::init()
 {
-
 }
 
 void CStack::pushItem(CDataElement* ptr_data_element)
@@ -42,6 +41,11 @@ int CStack::printItems()
 	printStack(ptr_top_stack_node);
 
 	return 0;
+}
+
+void CStack::pushFirst()
+{
+	push(&ptr_top_stack_node, NULL);
 }
 
 int CStack::exit()
@@ -76,6 +80,18 @@ int CStack::isEmpty(CStackNode* ptr_root)
 	// check if this stack node object exists on the stack
 	return !ptr_root;
 }
+
+/*
+A pointer variable is an object that can point to another object. Here int *ptr = NULL; declares ptr as a pointer object, that potentially points to an object of int.
+
+The value initially stored into this pointer object is NULL (it is initialized to NULL, so ptr does not point to any object).
+
+Now, ptr too resides in memory. It needs enough bytes to contain the address of the pointed-to object. So it too needs to have an address. Therefore
+
+ptr evaluates to the address of object that ptr points to.
+&ptr evaluates to the location of the ptr object itself in memory
+*ptr evaluates to the value of the object that ptr points to, if it points to an object. If it does not point to an object, then the behaviour is undefined.
+*/
 
 void CStack::push(CStackNode** ptr_root, CDataElement* ptr_data_element)
 {
@@ -128,6 +144,11 @@ int CStack::printStack(CStackNode* ptr_root)
 	}
 
 	return 0;
+}
+
+CStackNode::CStackNode()
+{
+	this->previous = NULL;
 }
 
 int CStackNode::copy(CDataElement* ptr_copy_item)

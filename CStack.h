@@ -5,6 +5,7 @@
 class CStackNode : public CDataElement
 {
 public:
+	CStackNode();
 	CStackNode* previous;
 	int copy(CDataElement* ptr_copy_item);
 };
@@ -19,6 +20,7 @@ public:
 	int popItem();
 	int peekItem();
 	int printItems();
+	void pushFirst();
 private:
 	void init();
 	int exit();
