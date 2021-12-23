@@ -1,9 +1,9 @@
 // AoC_2021_day_09.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include "dipro_utils.h"
 #include "CStack.h"
 #include "CDataElement.h"
-#include <fstream>
 #include <string>
 #include <iostream>
 
@@ -20,9 +20,6 @@ const int LOW_POINT_COUNT = 4; // constant for number of low points in the data
 const string INPUT_FILE = "Data/heights_test.txt"; // filename with the input data
 const int LARGE_DUMMY_VALUE = 999;
 
-int getInputData(string* input_data, string file_name);
-int charToInt(char c);
-int decodeStr(string s, int** pArray, int row);
 Edges getEdgeInfo(int row, int col);
 int checkMinValue(int v, int first, int second, int third, int fourth);
 int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col);
@@ -31,6 +28,7 @@ int calculateBasinSize(CDataElement* pDataElement, int** pArray);
 int algorithmDay9(int** pArray, CDataElement* pArray_low_points);
 int runDay9();
 int testStackNode(CDataElement* pArray_low_points);
+int resetArray(int** pArray);
 
 int main()
 {
@@ -38,114 +36,6 @@ int main()
 
 	cout << "\n";
 	system("pause");
-	return 0;
-}
-
-// this function opens a file and reads the lines into a string array
-int getInputData(string* input_data, string file_name)
-{
-	// input param: string* input_data: pointer to array that receives the input strings from file
-	// input param: string file_name: the file to read from
-
-	string line; // here we store a line of input data
-
-	// define and open the filestream
-	ifstream in;
-	in.open(file_name);
-
-	// loop through all the lines in the input file
-	int i = 0;
-	while (!in.eof())
-	{
-		// read the line from the current position in the file
-		getline(in, line);
-		// store the input data in a line
-		*(input_data + i) = line;
-		i++;
-	}
-
-	// close file and free resources
-	in.close();
-
-	// return function value
-	return 0;
-}
-
-// this function is a util function that converts a char into an int digit
-int charToInt(char c)
-{
-	// input param: char c: the char to convert to an int
-
-	int output_int = 0;
-
-	// check which char is the input and return the int representation
-	switch (c)
-	{
-	case('0'):
-		output_int = 0;
-		break;
-	case('1'):
-		output_int = 1;
-		break;
-	case('2'):
-		output_int = 2;
-		break;
-	case('3'):
-		output_int = 3;
-		break;
-	case('4'):
-		output_int = 4;
-		break;
-	case('5'):
-		output_int = 5;
-		break;
-	case('6'):
-		output_int = 6;
-		break;
-	case('7'):
-		output_int = 7;
-		break;
-	case('8'):
-		output_int = 8;
-		break;
-	case('9'):
-		output_int = 9;
-		break;
-
-	default:
-		bool bool_talktalk = true; // if true than we are debugging
-		if (bool_talktalk)
-		{
-			cout << "Warning: input char is not an integer!";
-		}
-		break;
-	}
-
-	return output_int;
-}
-
-// this function has a string as input and decodes it into a multidimensional array of ints
-int decodeStr(string s, int** pArray, int row)
-{
-	// input param: string s: this is the string to convert to an integer array
-	// input param: int** pArray: this pointer to an int array receives the integer values from the string
-	// input param: int row: this is the row index in the integer array
-
-	int int_from_str = 0; // this variable  contains the int that is decoded from the substring
-	char* charr_arr; //pointer to a char array
-	charr_arr = &s[0]; // store the adress of string s
-	
-	// how many elements in this string?
-	int string_length = s.length();
-	// loop through all the elements in the string
-	for (int i = 0; i < string_length; i++)
-	{
-		// decode the int value in the substring
-		int_from_str = charToInt(*(charr_arr + i));
-		// store the int value in the integer array in the proper row
-		*(*(pArray + row) + i) = int_from_str;
-	}
-
 	return 0;
 }
 
@@ -283,6 +173,31 @@ int printDataElement(CDataElement* pDataElement)
 	return 0;
 }
 
+int resetArray(int** pArray)
+{
+	// reset the integer array with input data, set all non 9 values to -1
+	// loop through all the int values
+	int int_empty = -1;
+	int int_print = 0;
+	for (int i = 0; i < NUM_LINES; i++)
+	{
+		for (int j = 0; j < LEN_LINE; j++)
+		{
+			if (*(*(pArray + i) + j) != 9)
+			{
+				*(*(pArray + i) + j) = int_empty;
+			}
+			// check this
+			int_print = *(*(pArray + i) + j);
+			cout << int_print;
+		}
+		// check this
+		cout << "\n";
+	}
+
+	return 0;
+}
+
 int calculateBasinSize(CDataElement* pDataElement, int** pArray)
 {
 	// reset the integer array with input data, set all non 9 values to -1
@@ -299,25 +214,7 @@ int calculateBasinSize(CDataElement* pDataElement, int** pArray)
 	//     increment the number of sampled points, this is the size of the basin
 	//	   load next stack item for investigation
 
-	// reset the integer array with input data, set all non 9 values to -1
-	// loop through all the int values
-	int int_empty = -1;
-	int int_print = 0;
-	for (int i = 0; i < NUM_LINES; i++)
-	{
-		for (int j = 0; j < LEN_LINE; j++)
-		{
-			if ( *(*(pArray + i) + j) != 9 )
-			{
-				*(*(pArray + i) + j) = int_empty;
-			}
-			// check this
-			int_print = *(*(pArray + i) + j);
-			cout << int_print;
-		}
-		// check this
-		cout << "\n";
-	}
+	resetArray(pArray);
 
 	return 0;
 }
@@ -382,10 +279,32 @@ int algorithmDay9(int** pArray, CDataElement* pArray_low_points)
 
 	calculateBasinSize(pArray_low_points, pArray);
 
-	testStackNode(pArray_low_points);
+	// testStackNode(pArray_low_points);
 
 	// calculate sum of all found risk levels
 	return sum_risk_level;
+}
+
+// Driver code
+int testStackNode(CDataElement* pArray_low_points)
+{
+	// create a new StackNode pointer
+	CStack stack;
+
+	for (int i = 0; i < LOW_POINT_COUNT; i++)
+	{
+		// push information from data element to stack node
+		stack.pushItem((pArray_low_points + i));
+	}
+
+	// now we pop an element from the stack
+	stack.popItem();
+	// we investigate the current top element
+	stack.peekItem();
+	// print alle the items
+	stack.printItems();
+
+	return 0;
 }
 
 // this function retrieves the data and runs the central algorithm
@@ -428,28 +347,6 @@ int runDay9()
 	delete[] input_data;
 
 	// return function value
-	return 0;
-}
-
-// Driver code
-int testStackNode(CDataElement* pArray_low_points)
-{
-	// create a new StackNode pointer
-	CStack stack;
-
-	for (int i = 0; i < LOW_POINT_COUNT; i++)
-	{
-		// push information from data element to stack node
-		stack.pushItem((pArray_low_points + i));
-	}
-	
-	// now we pop an element from the stack
-	stack.popItem();
-	// we investigate the current top element
-	stack.peekItem();
-	// print alle the items
-	stack.printItems();
-
 	return 0;
 }
 

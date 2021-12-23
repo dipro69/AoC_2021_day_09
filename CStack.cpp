@@ -78,7 +78,7 @@ CStackNode* CStack::newNode(CDataElement* ptr_data_element)
 int CStack::isEmpty(CStackNode* ptr_root)
 {
 	// check if this stack node object exists on the stack
-	return !ptr_root;
+	return (ptr_root == nullptr);
 }
 
 /*
