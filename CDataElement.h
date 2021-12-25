@@ -2,6 +2,7 @@
 class CDataElement
 {
 public:
+	CDataElement();
 	int setCoordinates(int in_row, int in_col);
 	int getRow();
 	int getCol();
@@ -10,6 +11,7 @@ public:
 	int setRiskLevel(int in_risk_level);
 	int getRiskLevel();
 	int setNumElements(int in_num_elements);
+	int getNumElements();
 protected:
 	int row;
 	int col;

@@ -112,3 +112,61 @@ int decodeStr(string s, int** pArray, int row)
 
 	return 0;
 }
+
+// A recursive function to replace 
+// previous color 'currColor' at  '(x, y)'  
+// and all surrounding pixels of (x, y) 
+// with new color 'newColor'
+int doFloodFill(int** p2DIntArr, int row, int col, int color, int num_rows, int num_cols)
+{
+	// Base cases
+	if (row < 0 || row >= num_rows || col < 0 || col >= num_cols) // if point is outside array then do not continue
+	{
+		return 0;
+	}
+	else if (*(*(p2DIntArr + row) + col) != -1)
+	{
+		if (*(*(p2DIntArr + row) + col) == -2) // if point is a border than do not continue
+		{
+			return 0;
+		}
+		else if (*(*(p2DIntArr + row) + col) == color) // if point is already colored than do not continue
+		{
+			return 0;
+		}
+	}
+	else if (*(*(p2DIntArr + row) + col) == -1)
+	{
+		// Replace the color at cell (x, y) 
+		*(*(p2DIntArr + row) + col) = color;
+
+		// Recursively call for north, east, south and west 
+		doFloodFill(p2DIntArr, row + 1, col, color, num_rows, num_cols);
+		doFloodFill(p2DIntArr, row - 1, col, color, num_rows, num_cols);
+		doFloodFill(p2DIntArr, row, col + 1, color, num_rows, num_cols);
+		doFloodFill(p2DIntArr, row, col - 1, color, num_rows, num_cols);
+	}
+
+	return 0;
+}
+
+int bubbleSort(int* pIntArray, int num_elements)
+{
+	int i, j, temp, pass = 0;
+	
+	for (i = 0; i < num_elements; i++)
+	{
+		for (j = i + 1; j < num_elements; j++)
+		{
+			if (*(pIntArray + j) < *(pIntArray + i) )
+			{
+				temp = *(pIntArray + i);
+				*(pIntArray + i) = *(pIntArray + j);
+				*(pIntArray + j) = temp;
+			}
+		}
+		pass++;
+	}
+
+	return 0;
+}

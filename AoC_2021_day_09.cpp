@@ -11,24 +11,26 @@ using namespace std;
 
 enum class Edges{NO_EDGE_OR_CORNER, TOP_LEFT_CORNER, TOP_EDGE, TOP_RIGHT_CORNER, RIGHT_EDGE, BOTTOM_RIGHT_CORNER, BOTTOM_EDGE, BOTTOM_LEFT_CORNER, LEFT_EDGE};
 
-const int NUM_LINES = 5; // constant for number of lines in file to read
-const int LEN_LINE = 10; // constant for number of digits in an input line in file to read
+const int NUM_LINES = 100; // constant for number of lines in file to read
+const int LEN_LINE = 100; // constant for number of digits in an input line in file to read
 
-// const int LOW_POINT_COUNT = 237; // constant for number of low points in the data
-const int LOW_POINT_COUNT = 4; // constant for number of low points in the data
+const int LOW_POINT_COUNT = 237; // constant for number of low points in the data
+// const int LOW_POINT_COUNT = 4; // constant for number of low points in the data
 
-const string INPUT_FILE = "Data/heights_test.txt"; // filename with the input data
+const string INPUT_FILE = "Data/heights.txt"; // filename with the input data
 const int LARGE_DUMMY_VALUE = 999;
 
 Edges getEdgeInfo(int row, int col);
 int checkMinValue(int v, int first, int second, int third, int fourth);
-int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col);
-int printDataElement(CDataElement* pDataElement);
-int calculateBasinSize(CDataElement* pDataElement, int** pArray);
-int algorithmDay9(int** pArray, CDataElement* pArray_low_points);
+int calcLowPoint(int** p2DIntArr, Edges input_edge_info, int row, int col);
 int runDay9();
+int printArrayLowPoints(CDataElement* pArray_low_points);
+int print2DIntArray(int** p2DIntArr);
 int testStackNode(CDataElement* pArray_low_points);
-int resetArray(int** pArray);
+int algorithmDay9(CDataElement* pArray_low_points, int** p2DIntArr);
+int calculateBasinSize(CDataElement* pArray_low_points, int** p2DIntArr);
+int resetArray(CDataElement* pArray_low_points, int** p2DIntArr);
+int countBasinSize(CDataElement* pArray_low_points, int** p2DIntArr);
 
 int main()
 {
@@ -109,9 +111,9 @@ int checkMinValue(int v, int first, int second, int third, int fourth)
 }
 
 // this functions checks if current value is a low point
-int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col)
+int calcLowPoint(int** p2DIntArr, Edges input_edge_info, int row, int col)
 {
-	// input param: int** pArray: pointer to the multidimensional int array
+	// input param: int** p2DIntArr: pointer to the multidimensional int array
 	// input param: Edges input_edge_info: the edge info to check for each position
 	// input param: int row, col: coordinates for our current position
 
@@ -122,36 +124,36 @@ int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col)
 
 	// calculate if current array value is the minimum value compared to adjacent values, if true then it is a low_point
 	int output_result = -1;
-	int check_value = *(*(pArray + row) + col);
+	int check_value = *(*(p2DIntArr + row) + col);
 
 	switch(input_edge_info)
 	{
 	case(Edges::NO_EDGE_OR_CORNER):
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col));
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col - 1), *(*(p2DIntArr + row) + col + 1), *(*(p2DIntArr + row - 1) + col), *(*(p2DIntArr + row + 1) + col));
 		break;
-	case(Edges::TOP_EDGE): // top edge
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), LARGE_DUMMY_VALUE);
+	case(Edges::TOP_EDGE):
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col - 1), *(*(p2DIntArr + row) + col + 1), *(*(p2DIntArr + row + 1) + col), LARGE_DUMMY_VALUE);
 		break;
-	case(Edges::BOTTOM_EDGE): // bottom edge
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), LARGE_DUMMY_VALUE);
+	case(Edges::BOTTOM_EDGE):
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col - 1), *(*(p2DIntArr + row) + col + 1), *(*(p2DIntArr + row - 1) + col), LARGE_DUMMY_VALUE);
 		break;
-	case(Edges::LEFT_EDGE): // left edge
-		output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col + 1), LARGE_DUMMY_VALUE);
+	case(Edges::LEFT_EDGE):
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row - 1) + col), *(*(p2DIntArr + row + 1) + col), *(*(p2DIntArr + row) + col + 1), LARGE_DUMMY_VALUE);
 		break;
-	case(Edges::RIGHT_EDGE): // right edge
-		output_result = checkMinValue(check_value, *(*(pArray + row - 1) + col), *(*(pArray + row + 1) + col), *(*(pArray + row) + col - 1), LARGE_DUMMY_VALUE);
+	case(Edges::RIGHT_EDGE):
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row - 1) + col), *(*(p2DIntArr + row + 1) + col), *(*(p2DIntArr + row) + col - 1), LARGE_DUMMY_VALUE);
 		break;
 	case(Edges::TOP_LEFT_CORNER):
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row + 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col + 1), *(*(p2DIntArr + row + 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
 		break;
 	case(Edges::TOP_RIGHT_CORNER):
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row + 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col - 1), *(*(p2DIntArr + row + 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
 		break;
 	case(Edges::BOTTOM_LEFT_CORNER):
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col + 1), *(*(pArray + row - 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col + 1), *(*(p2DIntArr + row - 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
 		break;
 	case(Edges::BOTTOM_RIGHT_CORNER):
-		output_result = checkMinValue(check_value, *(*(pArray + row) + col - 1), *(*(pArray + row - 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
+		output_result = checkMinValue(check_value, *(*(p2DIntArr + row) + col - 1), *(*(p2DIntArr + row - 1) + col), LARGE_DUMMY_VALUE, LARGE_DUMMY_VALUE);
 		break;
 	default:
 		break;
@@ -160,51 +162,109 @@ int calcLowPoint(int** pArray, Edges input_edge_info, int row, int col)
 	return output_result; // if -1 than no low point else return low point value
 }
 
-int printDataElement(CDataElement* pDataElement)
+int printArrayLowPoints(CDataElement* pArray_low_points)
 {
-	// temporary variables to store the data that we will show in cout
-	int	ti = pDataElement->getIndex();
-	int	tr = pDataElement->getRow();
-	int	tc = pDataElement->getCol();
-	int	trl = pDataElement->getRiskLevel();
+	// the array with low points is now filled
+	// first print out all th elow pint sfor verification
+	cout << "\n";
+	int i, ti, tr, tc, trl, tne = 0;
+	for (i = 0; i < LOW_POINT_COUNT; i++)
+	{
 
-	cout << "Low point info " << ti << " " << " " << tr << " " << tc << " " << trl << "\n";
-	
+		// temporary variables to store the data that we will show in cout
+		ti = (*(pArray_low_points + i)).getIndex();
+		tr = (*(pArray_low_points + i)).getRow();
+		tc = (*(pArray_low_points + i)).getCol();
+		trl = (*(pArray_low_points + i)).getRiskLevel();
+		tne = (*(pArray_low_points + i)).getNumElements();
+
+		cout << "Low point info " << ti << " " << " " << tr << " " << tc << " " << trl << " " << tne << "\n";
+	}
+
 	return 0;
 }
 
-int resetArray(int** pArray)
+int resetArray(CDataElement* pArray_low_points, int** p2DIntArr)
 {
 	// reset the integer array with input data, set all non 9 values to -1
 	// loop through all the int values
 	int int_empty = -1;
+	int int_border = 9;
+	int int_new_border = -2;
 	int int_print = 0;
+	int i, j = 0;
+
+	for (i = 0; i < NUM_LINES; i++)
+	{
+		for (j = 0; j < LEN_LINE; j++)
+		{
+			if (*(*(p2DIntArr + i) + j) != int_border)
+			{
+				*(*(p2DIntArr + i) + j) = int_empty;
+			}
+			else if (*(*(p2DIntArr + i) + j) = int_border)
+			{
+				*(*(p2DIntArr + i) + j) = int_new_border;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int print2DIntArray(int** p2DIntArr)
+{
 	for (int i = 0; i < NUM_LINES; i++)
 	{
 		for (int j = 0; j < LEN_LINE; j++)
 		{
-			if (*(*(pArray + i) + j) != 9)
-			{
-				*(*(pArray + i) + j) = int_empty;
-			}
-			// check this
-			int_print = *(*(pArray + i) + j);
-			cout << int_print;
+			cout << *(*(p2DIntArr + i) + j) << " ";
 		}
-		// check this
 		cout << "\n";
 	}
 
 	return 0;
 }
 
-int calculateBasinSize(CDataElement* pDataElement, int** pArray)
+int countBasinSize(CDataElement* pArray_low_points, int** p2DIntArr)
 {
-	// reset the integer array with input data, set all non 9 values to -1
+	int* pIntArray = new int[LOW_POINT_COUNT];
+
+	int i, row, col, index_val, num_elements = 0;
+	for (i = 0; i < LOW_POINT_COUNT; i++)
+	{
+		index_val = (*(pArray_low_points + i)).getIndex();
+		num_elements = 0;
+		
+		for (row = 0; row < NUM_LINES; row++)
+		{
+			for (col = 0; col < LEN_LINE; col++)
+			{
+				if (*(*(p2DIntArr + row) + col) == index_val)
+				{
+					num_elements++;
+				}
+			}
+		}
+		(*(pArray_low_points + i)).setNumElements(num_elements);
+		*(pIntArray + i) = num_elements;
+	}
+
+	bubbleSort(pIntArray, LOW_POINT_COUNT);
+	int output_result = *(pIntArray + LOW_POINT_COUNT - 3) * *(pIntArray + LOW_POINT_COUNT - 2) * *(pIntArray + LOW_POINT_COUNT - 1);
+
+	delete[] pIntArray;
+
+	return output_result;
+}
+
+int calculateBasinSize(CDataElement* pArray_low_points, int** p2DIntArr)
+{
+	// step 1 reset the integer array with input data, set all non 9 values to -1
 	// we are going to fill each basin with the index integer from it's origin low point (stored in CDataElement object)
 	// 
-	// start at row, col from low point stored in pDataElement and put in on the investigation stack as starting point
-	// start while (stack size not 0) do 
+	// step 2 walk through the low point array and start at row, col from low point stored in pDataElement
+	// do loop 
 	//	   investigate the top, bottom, left and right neighbours from current point on the stack
 	//	   if neighbour = 9, don't sample that point further
 	//     if neighbour another integer value, don't sample that point further
@@ -214,15 +274,30 @@ int calculateBasinSize(CDataElement* pDataElement, int** pArray)
 	//     increment the number of sampled points, this is the size of the basin
 	//	   load next stack item for investigation
 
-	resetArray(pArray);
+	// step 1 reset the integer array with input data, set all non 9 values to -1
+	resetArray(pArray_low_points, p2DIntArr);
 
-	return 0;
+	int i, row, col, color = 0;
+	// step 2 walk through the low point array and start at row, col from low point stored in pDataElement
+	for (i = 0; i < LOW_POINT_COUNT; i++)
+	{
+		// first get edge info for current low point position in the array
+		row = (*(pArray_low_points + i)).getRow();
+		col = (*(pArray_low_points + i)).getCol();
+		color = (*(pArray_low_points + i)).getIndex();
+		doFloodFill(p2DIntArr, row, col, color, NUM_LINES, LEN_LINE);
+	}   
+	
+	int output_result = countBasinSize(pArray_low_points, p2DIntArr);
+	cout << "\nResult day 9 part 2: " << output_result << "\n";
+
+	return output_result;
 }
 
 // this function runs the puzzle algorithm for AoC day9 part 1
-int algorithmDay9(int** pArray, CDataElement* pArray_low_points)
+int algorithmDay9(CDataElement* pArray_low_points, int** p2DIntArr)
 {
-	// input param: int** pArray: pointer to the multidimensional int array
+	// input param: int** p2DIntArr: pointer to the multidimensional int array
 
 	// puzzle day 9: part 1
 
@@ -245,7 +320,7 @@ int algorithmDay9(int** pArray, CDataElement* pArray_low_points)
 			// first get edge info for current position in the array
 			edge_info = getEdgeInfo(i, j);
 			// calculate if lowest point and if so get height, if not receive -1
-			height = calcLowPoint(pArray, edge_info, i, j);
+			height = calcLowPoint(p2DIntArr, edge_info, i, j);
 			// if indeed a lowest point then get risk level and total with output result in sum
 			if (height != -1)
 			{
@@ -253,7 +328,6 @@ int algorithmDay9(int** pArray, CDataElement* pArray_low_points)
 				// The risk level of a low point is 1 plus its height
 				risk_level = 1 + height;
 				sum_risk_level = sum_risk_level + risk_level;
-				cout << "risk_level: " << risk_level << "\n";
 
 				// here starts day 9 part 2
 				// store the low point coordinates in a list
@@ -272,12 +346,8 @@ int algorithmDay9(int** pArray, CDataElement* pArray_low_points)
 		}
 	}
 
-	for (int i = 0; i < LOW_POINT_COUNT; i++)
-	{
-		printDataElement((pArray_low_points + i));
-	}
-
-	calculateBasinSize(pArray_low_points, pArray);
+	// now calculate the basin size for each low point
+	calculateBasinSize(pArray_low_points, p2DIntArr);
 
 	// testStackNode(pArray_low_points);
 
@@ -310,40 +380,43 @@ int testStackNode(CDataElement* pArray_low_points)
 // this function retrieves the data and runs the central algorithm
 int runDay9()
 {
+	// init procedure
 	string* input_data = new string[NUM_LINES]; // string array for retrieving input data
 
 	// memory allocated for elements of rows
-	int** pArray = new int* [NUM_LINES];
+	int** p2DIntArr = new int* [NUM_LINES];
 	// memory allocated for array with all the low points in the data
 	CDataElement* pArray_low_points = new CDataElement[LOW_POINT_COUNT];
 
 	// memory allocated for  elements of each column.  
 	for (int i = 0; i < NUM_LINES; i++)
 	{
-		*(pArray + i) = new int[LEN_LINE];
+		*(p2DIntArr + i) = new int[LEN_LINE];
 	}
 
+	// read data from file
 	getInputData(input_data, INPUT_FILE); // read the data from file
 
 	// convert input data strings to integers
 	for (int i = 0; i < NUM_LINES; i++)
 	{
-		decodeStr(input_data[i], pArray, i);
+		decodeStr(input_data[i], p2DIntArr, i);
 	}
 
 	// perform the central algorithm to get puzzle answer
-	int sum = algorithmDay9(pArray, pArray_low_points);
+	int sum = algorithmDay9(pArray_low_points, p2DIntArr);
 	cout << "Sum of puzzle day 9 part 1 = " << sum << "\n";
 
+	// exit procedure
 	// free the allocated memory 
 	delete[] pArray_low_points;
 
 	for (int i = 0; i < NUM_LINES; i++)
 	{
-		delete[] pArray[i];
+		delete[] p2DIntArr[i];
 	}
 
-	delete[] pArray;
+	delete[] p2DIntArr;
 	delete[] input_data;
 
 	// return function value

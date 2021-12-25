@@ -1,5 +1,14 @@
 # include "CDataElement.h"
 
+CDataElement::CDataElement()
+{
+	row = 0;
+	col = 0;
+	index = 0;
+	risk_level = 0;
+	num_elements = 0;
+}
+
 int CDataElement::setCoordinates(int in_row, int in_col)
 {
 	row = in_row;
@@ -43,4 +52,9 @@ int CDataElement::setNumElements(int in_num_elements)
 {
 	num_elements = in_num_elements;
 	return 0;
+}
+
+int CDataElement::getNumElements()
+{
+	return num_elements;
 }
